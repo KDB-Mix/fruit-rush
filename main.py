@@ -11,7 +11,11 @@ save_data: dict = {
 
 
 pygame.init()
+pygame.mixer.init()
 clock = pygame.time.Clock()
+
+catch = pygame.mixer.Sound("Assets/SFX/Catch.wav")
+shake = pygame.mixer.Sound("Assets/SFX/Shake.mp3")
 
 sprite_frame_size = pygame.Vector2(16, 16)
 
@@ -137,6 +141,7 @@ while True:
             falling_fruit_pos = pygame.Vector2(random.randint(10, round(window.width-falling_fruit.get_rect().right-10)), -100)
             falling_fruit = pygame.image.load("Assets/Sprites/Fruit rush.png").subsurface((random.randint(1, 2)*16, 0, sprite_frame_size.x, sprite_frame_size.y))
             falling_fruit = pygame.transform.scale(falling_fruit, (128, 128))
+            catch.play()
 
     if fail >= 3 and playing:
         playing = False
@@ -150,6 +155,7 @@ while True:
         shakeTimer = pygame.time.get_ticks()
         shakestarttime = pygame.time.get_ticks()
         randomTimeForShake = random.randint(6000, 8000)
+        shake.play()
 
     #Output
     window.fill((255, 255, 255))
