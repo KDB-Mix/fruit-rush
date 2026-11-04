@@ -3,6 +3,7 @@ import random
 import json
 from pathlib import Path
 from platformdirs import user_data_path
+import math
 
 save_data: dict = {
 
@@ -76,10 +77,14 @@ tree = pygame.transform.scale(tree, window.size)
 player_pos = pygame.Vector2(336, 400)
 player_velocity = pygame.Vector2()
 
-falling_fruit_pos = pygame.Vector2(random.randint(10, round(window.width-falling_fruit.get_rect().right-10)), -16)
+falling_fruit_pos = pygame.Vector2(random.randint(10, round(window.width-falling_fruit.get_rect().right-10)), -100)
 falling_fruit_velocity = pygame.Vector2(0, 400)
 
 tree_pos = pygame.Vector2()
+
+shakestarttime = 0
+shakeTimer = 0
+randomTimeForShake = random.randint(6000, 8000)
 
 dt = 0
 fail = 0
@@ -97,7 +102,7 @@ def checkCollision():
     )
 playing = False
 while True:
-    # Inpute
+    # Input
 
     #Handle exit
     for event in pygame.event.get():
@@ -109,30 +114,43 @@ while True:
                     playing = True
                     falling_fruit_pos = pygame.Vector2(random.randint(10, round(window.width-falling_fruit.get_rect().right-10)), -16)
                     fail = 0
+                    shakeTimer = pygame.time.get_ticks()
+                    shakestarttime = pygame.time.get_ticks()
                 if player_velocity.x != 0:
                     player_velocity.x = -player_velocity.x
                 else:
                     player_velocity.x = SPEED
+
     if player.get_rect().right+player_pos.x >= window.width:
         player_velocity.x = -SPEED
     elif player_pos.x <= 0:
         player_velocity.x = SPEED
     if playing:
         if falling_fruit_pos.y >= window.height:
+            fail += 1
             falling_fruit_pos = pygame.Vector2(random.randint(10, round(window.width-falling_fruit.get_rect().right-10)), -100)
             falling_fruit = pygame.image.load("Assets/Sprites/Fruit rush.png").subsurface((random.randint(1, 2)*16, 0, sprite_frame_size.x, sprite_frame_size.y))
-            falling_fruit = pygame.transform.scale(falling_fruit, (128, 128))
-            fail += 1
+            falling_fruit = pygame.transform.scale(falling_fruit, (128, 128)) 
         
         if checkCollision():
             score += 1
             falling_fruit_pos = pygame.Vector2(random.randint(10, round(window.width-falling_fruit.get_rect().right-10)), -100)
             falling_fruit = pygame.image.load("Assets/Sprites/Fruit rush.png").subsurface((random.randint(1, 2)*16, 0, sprite_frame_size.x, sprite_frame_size.y))
             falling_fruit = pygame.transform.scale(falling_fruit, (128, 128))
+
     if fail >= 3 and playing:
         playing = False
         save_score(score)
- 
+    if pygame.time.get_ticks() - shakestarttime < 500 and playing:
+        tree_pos.x = 3*math.asin(math.sin(.05*pygame.time.get_ticks()))
+    else:
+        tree_pos.x = 0
+
+    if playing and pygame.time.get_ticks() - shakeTimer > randomTimeForShake:
+        shakeTimer = pygame.time.get_ticks()
+        shakestarttime = pygame.time.get_ticks()
+        randomTimeForShake = random.randint(6000, 8000)
+
     #Output
     window.fill((255, 255, 255))
 
