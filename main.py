@@ -4,7 +4,9 @@ import json
 from pathlib import Path
 from platformdirs import user_data_path
 
-save_data = {}
+save_data: dict = {
+
+}
 
 
 pygame.init()
@@ -30,8 +32,9 @@ def to_json(dict_str: str):
 
 
 def init_default_save():
-    save_data.get(HIGH_SCORE_KEY, int(0))
-
+    if not HIGH_SCORE_KEY in save_data:
+        save_data[HIGH_SCORE_KEY] = 0
+        print(save_data)
 
 if (not save_file.exists()):
     init_default_save()
@@ -40,14 +43,14 @@ if to_json(save_file.read_text()) == None:
     init_default_save()
     save_file.write_text(json.dumps(save_data, indent=2))
 save_data = json.loads(save_file.read_text())
+init_default_save()
 
 def save_score(score: int):
-    if save_data[HIGH_SCORE_KEY] < score:
+    global save_data
+    if save_data.get(HIGH_SCORE_KEY) < score:
         save_data[HIGH_SCORE_KEY] = score
-        save_data = json.loads(save_file.read_text())
-
+        save_file.write_text(json.dumps(save_data, indent=2))
 score = 0
-
 
 player = pygame.surface.Surface((100, 100))
 player.fill((255, 255, 255))
@@ -79,6 +82,7 @@ falling_fruit_velocity = pygame.Vector2(0, 400)
 tree_pos = pygame.Vector2()
 
 dt = 0
+fail = 0
 
 SPEED = 600
 # print(window.width)
@@ -91,7 +95,7 @@ def checkCollision():
         (int(player_pos.y) <= int(falling_fruit_pos.y+falling_fruit.height-150) and
         int(falling_fruit_pos.y) <= int(player_pos.y+player.height))
     )
-
+playing = False
 while True:
     # Inpute
 
@@ -101,6 +105,10 @@ while True:
             quit(0)
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
+                if not playing: 
+                    playing = True
+                    falling_fruit_pos = pygame.Vector2(random.randint(10, round(window.width-falling_fruit.get_rect().right-10)), -16)
+                    fail = 0
                 if player_velocity.x != 0:
                     player_velocity.x = -player_velocity.x
                 else:
@@ -109,24 +117,32 @@ while True:
         player_velocity.x = -SPEED
     elif player_pos.x <= 0:
         player_velocity.x = SPEED
-
-    if falling_fruit_pos.y >= window.height:
+    if playing:
+        if falling_fruit_pos.y >= window.height:
+            falling_fruit_pos = pygame.Vector2(random.randint(10, round(window.width-falling_fruit.get_rect().right-10)), -100)
+            falling_fruit = pygame.image.load("Assets/Sprites/Fruit rush.png").subsurface((random.randint(1, 2)*16, 0, sprite_frame_size.x, sprite_frame_size.y))
+            falling_fruit = pygame.transform.scale(falling_fruit, (128, 128))
+            fail += 1
+        
         if checkCollision():
             score += 1
-        falling_fruit_pos = pygame.Vector2(random.randint(10, round(window.width-falling_fruit.get_rect().right-10)), -100)
-        falling_fruit = pygame.image.load("Assets/Sprites/Fruit rush.png").subsurface((random.randint(1, 2)*16, 0, sprite_frame_size.x, sprite_frame_size.y))
-        falling_fruit = pygame.transform.scale(falling_fruit, (128, 128))
-
+            falling_fruit_pos = pygame.Vector2(random.randint(10, round(window.width-falling_fruit.get_rect().right-10)), -100)
+            falling_fruit = pygame.image.load("Assets/Sprites/Fruit rush.png").subsurface((random.randint(1, 2)*16, 0, sprite_frame_size.x, sprite_frame_size.y))
+            falling_fruit = pygame.transform.scale(falling_fruit, (128, 128))
+    if fail >= 3 and playing:
+        playing = False
+        save_score(score)
  
     #Output
     window.fill((255, 255, 255))
 
 
     #draw sprites
-    player_pos.x += player_velocity.x*dt
-    player_pos.y += player_velocity.y*dt
-    falling_fruit_pos.x += falling_fruit_velocity.x*dt
-    falling_fruit_pos.y += falling_fruit_velocity.y*dt
+    if playing:
+        player_pos.x += player_velocity.x*dt
+        player_pos.y += player_velocity.y*dt
+        falling_fruit_pos.x += falling_fruit_velocity.x*dt
+        falling_fruit_pos.y += falling_fruit_velocity.y*dt
 
     window.blit(bg, (0, 0))
     window.blit(tree, tree_pos)
