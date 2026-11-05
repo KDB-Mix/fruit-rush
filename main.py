@@ -16,6 +16,8 @@ clock = pygame.time.Clock()
 
 catch = pygame.mixer.Sound("Assets/SFX/Catch.wav")
 shake = pygame.mixer.Sound("Assets/SFX/Shake.mp3")
+celebrate = pygame.mixer.Sound("Assets/SFX/partyblower.mp3")
+
 score_text = pygame.font.Font("Assets/Font/512x8Serif.ttf", 64)
 text_128 = pygame.font.Font("Assets/Font/DotGothic16-Regular.ttf", 128)
 
@@ -167,7 +169,11 @@ while True:
     if fail >= 3 and playing and not paused:
         playing = False
         game_state = 2
-        got_highscore = save_score(score)
+        if save_score(score):
+            got_highscore = True
+            celebrate.play()
+        else:
+            got_highscore = False
     if pausable_timer - shakestarttime < 500 and playing and not paused:
         tree_pos.x = 3*math.asin(math.sin(.05*pausable_timer))
     else:
