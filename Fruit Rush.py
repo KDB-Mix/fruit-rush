@@ -124,7 +124,7 @@ while True:
     #Handle exit
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            quit(0)
+            pygame.quit()
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 paused = not paused
