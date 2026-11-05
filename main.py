@@ -72,7 +72,7 @@ player = pygame.transform.scale(player, (128, 128))
 
 falling_fruit = pygame.surface.Surface((100, 100))
 falling_fruit.fill((255, 255, 255))
-falling_fruit = pygame.image.load("Assets/Sprites/Fruit rush.png").subsurface((random.randint(1, 2)*16, 0, sprite_frame_size.x, sprite_frame_size.y))
+falling_fruit = pygame.image.load("Assets/Sprites/Fruit rush.png").subsurface((random.randint(1, 5)*16, 0, sprite_frame_size.x, sprite_frame_size.y))
 falling_fruit = pygame.transform.scale(falling_fruit, (128, 128))
 
 bg = pygame.surface.Surface(window.size)
@@ -88,7 +88,7 @@ tree = pygame.transform.scale(tree, window.size)
 player_pos = pygame.Vector2(336, 400)
 player_velocity = pygame.Vector2()
 
-falling_fruit_pos = pygame.Vector2(random.randint(10, round(window.width-falling_fruit.get_rect().right-10)), -100)
+falling_fruit_pos = pygame.Vector2(random.randint(10, round(window.width-falling_fruit.get_rect().right-10)), -128)
 falling_fruit_velocity = pygame.Vector2(0, 400)
 
 tree_pos = pygame.Vector2()
@@ -155,14 +155,14 @@ while True:
     if playing:
         if falling_fruit_pos.y >= window.height:
             fail += 1
-            falling_fruit_pos = pygame.Vector2(random.randint(10, round(window.width-falling_fruit.get_rect().right-10)), -100)
-            falling_fruit = pygame.image.load("Assets/Sprites/Fruit rush.png").subsurface((random.randint(1, 2)*16, 0, sprite_frame_size.x, sprite_frame_size.y))
+            falling_fruit_pos = pygame.Vector2(random.randint(10, round(window.width-falling_fruit.get_rect().right-10)), -128)
+            falling_fruit = pygame.image.load("Assets/Sprites/Fruit rush.png").subsurface((random.randint(1, 5)*16, 0, sprite_frame_size.x, sprite_frame_size.y))
             falling_fruit = pygame.transform.scale(falling_fruit, (128, 128)) 
         
         if checkCollision():
             score += 1
-            falling_fruit_pos = pygame.Vector2(random.randint(10, round(window.width-falling_fruit.get_rect().right-10)), -100)
-            falling_fruit = pygame.image.load("Assets/Sprites/Fruit rush.png").subsurface((random.randint(1, 2)*16, 0, sprite_frame_size.x, sprite_frame_size.y))
+            falling_fruit_pos = pygame.Vector2(random.randint(10, round(window.width-falling_fruit.get_rect().right-10)), -128)
+            falling_fruit = pygame.image.load("Assets/Sprites/Fruit rush.png").subsurface((random.randint(1, 5)*16, 0, sprite_frame_size.x, sprite_frame_size.y))
             falling_fruit = pygame.transform.scale(falling_fruit, (128, 128))
             catch.play()
 
