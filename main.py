@@ -17,6 +17,7 @@ clock = pygame.time.Clock()
 catch = pygame.mixer.Sound("Assets/SFX/Catch.wav")
 shake = pygame.mixer.Sound("Assets/SFX/Shake.mp3")
 score_text = pygame.font.Font("Assets/Font/512x8Serif.ttf", 64)
+text_128 = pygame.font.Font("Assets/Font/DotGothic16-Regular.ttf", 128)
 
 sprite_frame_size = pygame.Vector2(16, 16)
 
@@ -56,6 +57,8 @@ def save_score(score: int):
     if save_data.get(HIGH_SCORE_KEY) < score:
         save_data[HIGH_SCORE_KEY] = score
         save_file.write_text(json.dumps(save_data, indent=2))
+        return True
+    else: return False
 score = 0
 last_score_reading = 0
 
@@ -94,6 +97,10 @@ randomTimeForShake = random.randint(6000, 8000)
 
 dt = 0
 fail = 0
+paused = False
+pausable_timer = 0.0
+game_state = 0
+got_highscore = False
 
 SPEED = 600
 # print(window.width)
@@ -108,6 +115,8 @@ def checkCollision():
     )
 playing = False
 while True:
+    if not paused:
+        pausable_timer+=dt*1000
     # Input
 
     #Handle exit
@@ -115,19 +124,26 @@ while True:
         if event.type == pygame.QUIT:
             quit(0)
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                if not playing: 
-                    playing = True
-                    falling_fruit_pos = pygame.Vector2(random.randint(10, round(window.width-falling_fruit.get_rect().right-10)), -16)
-                    fail = 0
-                    score = 0
-                    last_score_reading = 0
-                    shakeTimer = pygame.time.get_ticks()
-                    shakestarttime = pygame.time.get_ticks()
-                if player_velocity.x != 0:
-                    player_velocity.x = -player_velocity.x
+            if event.key == pygame.K_ESCAPE:
+                paused = not paused
+            elif event.key != pygame.K_LMETA:
+                game_state = 1
+                if not paused:
+                    if not playing: 
+                        playing = True
+                        falling_fruit_pos = pygame.Vector2(random.randint(10, round(window.width-falling_fruit.get_rect().right-10)), -16)
+                        fail = 0
+                        score = 0
+                        last_score_reading = 0
+                        shakeTimer = pausable_timer
+                        shakestarttime = pausable_timer
+                        falling_fruit_velocity.y = 400
+                    if player_velocity.x != 0:
+                        player_velocity.x = -player_velocity.x
+                    else:
+                        player_velocity.x = SPEED
                 else:
-                    player_velocity.x = SPEED
+                    paused = False
 
 
     if player.get_rect().right+player_pos.x >= window.width:
@@ -148,17 +164,18 @@ while True:
             falling_fruit = pygame.transform.scale(falling_fruit, (128, 128))
             catch.play()
 
-    if fail >= 3 and playing:
+    if fail >= 3 and playing and not paused:
         playing = False
-        save_score(score)
-    if pygame.time.get_ticks() - shakestarttime < 500 and playing:
-        tree_pos.x = 3*math.asin(math.sin(.05*pygame.time.get_ticks()))
+        game_state = 2
+        got_highscore = save_score(score)
+    if pausable_timer - shakestarttime < 500 and playing and not paused:
+        tree_pos.x = 3*math.asin(math.sin(.05*pausable_timer))
     else:
         tree_pos.x = 0
 
-    if playing and pygame.time.get_ticks() - shakeTimer > randomTimeForShake:
-        shakeTimer = pygame.time.get_ticks()
-        shakestarttime = pygame.time.get_ticks()
+    if playing and pausable_timer - shakeTimer > randomTimeForShake and not paused:
+        shakeTimer = pausable_timer
+        shakestarttime = pausable_timer
         randomTimeForShake = random.randint(6000, 8000)
         shake.play()
     text_surface = score_text.render(str(score), False, (255, 255, 255))
@@ -171,7 +188,7 @@ while True:
 
 
     #draw sprites
-    if playing:
+    if playing and not paused and game_state == 1:
         player_pos.x += player_velocity.x*dt
         player_pos.y += player_velocity.y*dt
         falling_fruit_pos.x += falling_fruit_velocity.x*dt
@@ -182,6 +199,19 @@ while True:
     window.blit(falling_fruit, falling_fruit_pos)
     window.blit(player, player_pos)
     window.blit(text_surface, (400-text_surface.width/2, 20))
+
+    text_to_print = "".split("\n")
+    match game_state:
+        case 0:
+            text_to_print = "FRUIT\nRUSH".split("\n")
+        case 2:
+            if got_highscore:
+                text_to_print = "NEW\nHIGHSCORE".split("\n")
+            else:
+                text_to_print = "GAME\nOVER".split("\n")
+    for text in text_to_print:
+        title_surface = text_128.render(text, False, (100, 100, 100))
+        window.blit(title_surface, (400-title_surface.width/2, 300-title_surface.height+(title_surface.height+30)*((text_to_print.index(text))/len(text_to_print))))
 
     pygame.display.flip()
     dt = clock.tick_busy_loop(60)/1000
