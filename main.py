@@ -36,6 +36,7 @@ async def main():
     text_128 = pygame.font.Font(assets_path / "Font" / "DotGothic16-Regular.ttf", 128)
 
     spritesheet = pygame.image.load(assets_path / "Sprites" / "Fruit rush.png")
+    bg_spritesheet = pygame.image.load(assets_path / "Sprites" / "BG fruit rush.png")
 
     sprite_frame_size = pygame.Vector2(16, 16)
 
@@ -94,12 +95,12 @@ async def main():
 
     bg = pygame.surface.Surface(window.size)
     bg.fill((255, 255, 255))
-    bg = pygame.image.load("Assets/Sprites/BG fruit rush.png").subsurface((0, 0, 100, 75))
+    bg = bg_spritesheet.subsurface((0, 0, 100, 75))
     bg = pygame.transform.scale(bg, window.size)
 
     tree = pygame.surface.Surface(window.size)
     tree.fill((255, 255, 255))
-    tree = pygame.image.load("Assets/Sprites/BG fruit rush.png").subsurface((100, 0, 100, 75))
+    tree = bg_spritesheet.subsurface((100, 0, 100, 75))
     tree = pygame.transform.scale(tree, window.size)
 
     player_pos = pygame.Vector2(336, 400)
