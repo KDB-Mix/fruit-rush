@@ -6,6 +6,7 @@ from platformdirs import user_data_path
 import math
 import sys
 import asyncio
+import os
 
 def resource_path(relative_path):
     try:
