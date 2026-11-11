@@ -7,6 +7,14 @@ import math
 import sys
 import asyncio
 
+def resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
 async def main():
     save_data: dict = {
 
@@ -17,14 +25,16 @@ async def main():
     pygame.mixer.init()
     clock = pygame.time.Clock()
 
-    catch = pygame.mixer.Sound("Assets/SFX/Catch.wav")
-    shake = pygame.mixer.Sound("Assets/SFX/Shake.mp3")
-    celebrate = pygame.mixer.Sound("Assets/SFX/partyblower.mp3")
+    assets_path = Path(resource_path("Assets"))
+    
+    catch = pygame.mixer.Sound(assets_path / "SFX" / "Catch.wav")
+    shake = pygame.mixer.Sound(assets_path / "SFX" / "Shake.mp3")
+    celebrate = pygame.mixer.Sound(assets_path / "SFX" / "partyblower.mp3")
 
-    score_text = pygame.font.Font("Assets/Font/512x8Serif.ttf", 64)
-    text_128 = pygame.font.Font("Assets/Font/DotGothic16-Regular.ttf", 128)
+    score_text = pygame.font.Font(assets_path /"Font" / "512x8Serif.ttf", 64)
+    text_128 = pygame.font.Font(assets_path / "Font" / "DotGothic16-Regular.ttf", 128)
 
-    spritesheet = pygame.image.load("Assets/Sprites/Fruit rush.png")
+    spritesheet = pygame.image.load(assets_path / "Sprites" / "Fruit rush.png")
 
     sprite_frame_size = pygame.Vector2(16, 16)
 
@@ -162,13 +172,13 @@ async def main():
             if falling_fruit_pos.y >= window.height:
                 fail += 1
                 falling_fruit_pos = pygame.Vector2(random.randint(10, round(window.width-falling_fruit.get_rect().right-10)), -128)
-                falling_fruit = pygame.image.load("Assets/Sprites/Fruit rush.png").subsurface((random.randint(1, 5)*16, 0, sprite_frame_size.x, sprite_frame_size.y))
+                falling_fruit = spritesheet.subsurface((random.randint(1, 5)*16, 0, sprite_frame_size.x, sprite_frame_size.y))
                 falling_fruit = pygame.transform.scale(falling_fruit, (128, 128)) 
             
             if checkCollision():
                 score += 1
                 falling_fruit_pos = pygame.Vector2(random.randint(10, round(window.width-falling_fruit.get_rect().right-10)), -128)
-                falling_fruit = pygame.image.load("Assets/Sprites/Fruit rush.png").subsurface((random.randint(1, 5)*16, 0, sprite_frame_size.x, sprite_frame_size.y))
+                falling_fruit = spritesheet.subsurface((random.randint(1, 5)*16, 0, sprite_frame_size.x, sprite_frame_size.y))
                 falling_fruit = pygame.transform.scale(falling_fruit, (128, 128))
                 catch.play()
 
