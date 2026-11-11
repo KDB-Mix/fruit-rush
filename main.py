@@ -73,7 +73,7 @@ async def main():
     init_default_save()
 
     def save_score(score: int):
-        global save_data
+        nonlocal save_data
         if save_data.get(HIGH_SCORE_KEY) < score:
             save_data[HIGH_SCORE_KEY] = score
             save_file.write_text(json.dumps(save_data, indent=2))
