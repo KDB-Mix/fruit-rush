@@ -31,7 +31,7 @@ Make sure that you have pyinstaller installed:
 
 and run:
 
-`pyinstaller "Fruit Rush.spec"`
+`pyinstaller mian.spec`
 
 The compiled file will appear in `dist` and the result binary type (wiondows, mac, linux) depends on your os
 
